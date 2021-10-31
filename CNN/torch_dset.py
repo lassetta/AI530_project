@@ -7,7 +7,7 @@ import cv2
 
 ## Dataset class for reading the images from the 
 ## Data folder
-class construct_Dset(Dataset):
+class Dset(Dataset):
 
   # init constructer for the dataset
   def __init__(self):
@@ -67,6 +67,11 @@ def train_network(DL):
     print(imgs.shape)
     print(labels.shape)
     sys.exit(1)
+
+def get_dset():
+  dset = Dset()
+  return dset
+
 
 if __name__ == "__main__":
   # construct dataset
