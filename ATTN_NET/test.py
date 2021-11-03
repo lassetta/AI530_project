@@ -31,14 +31,14 @@ img = torch.rand((BATCH_SIZE,NUM_CHANNELS,IMG_WIDTH,IMG_HEIGHT))
 #encoder_
 
 
-class Embed(nn.Module):
+class VisionXformer(nn.Module):
   def __init__(
       self,
       img_shape = (256, 256),
       embed_dim = 128,
       ps = 4,
       ):
-    super(Embed, self).__init__()
+    super(VisionXformer, self).__init__()
     # patch size
     self.Spatch = ps
     # Number of patches
@@ -52,20 +52,48 @@ class Embed(nn.Module):
     # Positional Embeddings
     self.position_embed = nn.Parameter(torch.randn((1, self.Npatch + 1, embed_dim)))
 
+
+    # Transformer Encoder 
+    enc_layer = nn.TransformerEncoderLayer(d_model = 128, nhead = 4)
+    self.xformer = nn.TransformerEncoder(enc_layer, num_layers = 2)
+
+    # Classification Head
+    self.class_head = nn.Linear(128, 3)
+
+
+
+
   def forward(self, x):
+    # determine feedforward batch size
     batch_size = x.shape[0]
+    # rearrange input data
     x = rearrange(x, 'b c (h ph) (w pw) -> b (h w) (ph pw c)', ph = self.Spatch, pw = self.Spatch)
+    print(x.shape)
+    # project the patches to the embedded dimension
     x = self.project(x)
+    print(x.shape)
+    # get the token embeddings
     cls_tok_exp = self.cls_token.repeat(batch_size, 1, 1)
+    # concatenate the tokene embeddings and x
     x = torch.cat([cls_tok_exp, x], dim = 1)
+    # add the position embeddings to x
     x += self.position_embed
 
+    # send x through the transformer encoder
+    print(x.shape)
+    x = self.xformer(x)
+
+    # take the mean of x
+    x = x.mean(dim = 1)
+    # send x through the classification head
+    x = self.class_head(x)
     return x
 
 img = torch.rand((BATCH_SIZE,NUM_CHANNELS,IMG_WIDTH,IMG_HEIGHT))
-m = Embed()
+m = VisionXformer()
 x = m(img)
 print(x.shape)
+'''
 m2 = nn.TransformerEncoderLayer(d_model = 128, nhead = 4)
 m3 = nn.TransformerEncoder(m2, num_layers=2)
 y = m3(x)
@@ -74,6 +102,7 @@ print(y.shape)
 m4 = nn.Linear(128, 3)
 z = m4(y)
 print(z.shape)
+'''
 
 
 

@@ -8,7 +8,7 @@ import torch.optim as optim
 from tqdm import trange
 
 
-device = torch.device("cuda")
+device = torch.device("cuda" if torch.cuda.is_available() else 'cpu')
 
 def eval_network(net, crit, DL):
   # Put in evaluation mode to remove issues
@@ -24,7 +24,7 @@ def eval_network(net, crit, DL):
     # reshaping the images from (N,H,W,C)
     # to (N,C,H,W) for consistency with pytorch 
     # schema
-    imgs = imgs.permute(0,3,1,2) / 255.
+    imgs = torch.div(imgs.permute(0,3,1,2),255.)
     # converting the data to the device
     imgs, labels = Variable(imgs).to(device), Variable(labels[:,0]).to(device)
 
@@ -40,8 +40,6 @@ def eval_network(net, crit, DL):
     loss = crit(out, labels)
     # add loss
     total_loss += loss.item()
-  print(correct/total_samples)
-  print(total_loss/total_samples)
   return total_loss / total_samples, 100*correct.float() / total_samples
 
 

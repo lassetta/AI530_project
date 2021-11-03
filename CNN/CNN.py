@@ -6,13 +6,15 @@ from torch.autograd import Variable
 from model import gen_model 
 import torch.optim as optim
 from tqdm import trange
+from torchsummary import summary
 
 
-device = torch.device("cuda")
+device = torch.device("cuda" if torch.cuda.is_available() else 'cpu')
 
 def eval_network(net, crit, DL):
   # Put in evaluation mode to remove issues
   # such as dropout
+
   net.eval()
   # count samples
   total_samples = 0
@@ -40,8 +42,6 @@ def eval_network(net, crit, DL):
     loss = crit(out, labels)
     # add loss
     total_loss += loss.item()
-  print(correct/total_samples)
-  print(total_loss/total_samples)
   return total_loss / total_samples, 100*correct.float() / total_samples
 
 
