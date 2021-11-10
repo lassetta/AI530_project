@@ -43,9 +43,10 @@ for x in tqdm(range(dest.shape[0])):
     if 0 <= dest_x and dest_x < img.shape[0] and 0 <= dest_y and dest_y < img.shape[1]:
       dest[x,y] = img[dest_x,dest_y]
 
+plt.imshow(img)
+plt.show()
+
 plt.imshow(dest[:,:,0:3])
 plt.show()
 
-plt.imshow(img)
-plt.show()
 
