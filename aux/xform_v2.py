@@ -1,15 +1,14 @@
 import pandas as pd
 import numpy as np
 import cv2
-import imageio
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import os
 from scipy.interpolate import interp2d, RectBivariateSpline
 from scipy.ndimage.filters import gaussian_filter
 from scipy.spatial.distance import cdist
 
 def transform(img,focus_x, focus_y, mag_rad, mag_d, demag_w):
-  print(focus_x, focus_y, mag_rad)
   # define parameters
   # outlined in observablehq.com
   xform_mat = np.zeros((2,2))
@@ -23,7 +22,6 @@ def transform(img,focus_x, focus_y, mag_rad, mag_d, demag_w):
   bias[1] = -1
   
   A = np.matmul(np.linalg.inv(xform_mat),bias) 
-  print(A)
   xc = 1 - demag_w - (A[0]*(demag_w**2))/2
 
   # piecewise f function inverse
@@ -72,6 +70,7 @@ def transform(img,focus_x, focus_y, mag_rad, mag_d, demag_w):
   new_coords[:,1] = focus_x + np.sin(angle) * mag_rad * fish_inv 
 
   result = np.zeros_like(img)
+  # transform the image to the correct spots, using order 2 interpolation
   for i in range(img.shape[2]):
     xform = RectBivariateSpline(np.arange(img.shape[0]), np.arange(img.shape[1]), img[:,:,i], kx=2, ky=2)
     transform = xform(new_coords[:,0].flatten(), new_coords[:,1].flatten(), grid = False)
@@ -82,9 +81,23 @@ def transform(img,focus_x, focus_y, mag_rad, mag_d, demag_w):
 
 
 if __name__ == "__main__":
-  path = "doggo.jpg"
+  ROOT = "../Oxford_pets256/"
+  new_root = "../Oxford_pets256_fish/"
+  os.mkdir(new_root)
+  for fold in os.listdir(ROOT):
+    class_root = ROOT + fold + '/'
+    new_class_root = new_root + fold + "/"
+    os.mkdir(new_class_root)
+    print(fold)
+    for f in os.listdir(class_root):
+
+      path = class_root + f
+      new_path = new_class_root + f
+      img = cv2.imread(path)
+      img2 = transform(img,img.shape[0]/2.,img.shape[1]/2.,min(img.shape[0]//2, img.shape[1]//2),np.random.uniform(1,4),.4)
+      cv2.imwrite(new_path, img2)
+
   img = cv2.imread(path)
-  print(img.shape)
   img2 = transform(img,img.shape[0]/2.,img.shape[1]/2.,min(img.shape[0]//2, img.shape[1]//2),4,.4)
   plt.figure(1)
   plt.imshow(img2)
