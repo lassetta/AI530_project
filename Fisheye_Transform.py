@@ -8,9 +8,6 @@ class fisheye_generator():
     def __init__(self, sphere_radius, focal_distance = None):
         
         self.sphere_radius = sphere_radius
-        if self.sphere_radius < math.sqrt(2):
-           self.sphere_radius = math.sqrt(2)
-        
         self.focal_distance = focal_distance
         if self.focal_distance == None:
             self.focal_distance = self.sphere_radius
