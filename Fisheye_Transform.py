@@ -12,7 +12,7 @@ class fisheye_generator():
         if self.focal_distance == None:
             self.focal_distance = self.sphere_radius
 
-    def fisheye_transform(self, image):
+ def fisheye_transform(self, image):
         
         image_dims = len(image.shape)
         
@@ -41,12 +41,26 @@ class fisheye_generator():
         
         fisheye_images = torch.nn.functional.grid_sample(image, sample_tensor)
         
+        # crop image
+        
+        h_top = math.sin(math.atan(self.focal_distance))*(h/2)
+        w_top = math.sin(math.atan(self.focal_distance))*(w/2)
+        
+        
+        fisheye_images = fisheye_images[:,:,math.ceil(h/2-h_top):math.floor(h/2+h_top),math.ceil(w/2-w_top):math.floor(w/2+w_top)]
+        
+        # resize images
+        
+        fisheye_images = torchvision.transforms.Resize((h,w))(fisheye_images)
+        
         if image_dims <= 3:
             fisheye_images = torch.squeeze(fisheye_images, dim=0)
         if image_dims == 2:
             fisheye_images = torch.squeeze(fisheye_images, dim=0)
+            
         
         return fisheye_images
+        
         
         
         
