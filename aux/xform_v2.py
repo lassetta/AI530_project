@@ -82,12 +82,12 @@ def transform(img,focus_x, focus_y, mag_rad, mag_d, demag_w):
 
 if __name__ == "__main__":
   ROOT = "../Oxford_pets256/"
-  new_root = "../Oxford_pets256_fish/"
-  os.mkdir(new_root)
+  new_root = "../Oxford_pets256_fishx/"
+  #os.mkdir(new_root)
   for fold in os.listdir(ROOT):
     class_root = ROOT + fold + '/'
     new_class_root = new_root + fold + "/"
-    os.mkdir(new_class_root)
+    #os.mkdir(new_class_root)
     print(fold)
     for f in os.listdir(class_root):
 
@@ -95,10 +95,12 @@ if __name__ == "__main__":
       new_path = new_class_root + f
       img = cv2.imread(path)
       img2 = transform(img,img.shape[0]/2.,img.shape[1]/2.,min(img.shape[0]//2, img.shape[1]//2),np.random.uniform(1,4),.4)
+      plt.imshow(img2)
+      plt.show()
       cv2.imwrite(new_path, img2)
 
   img = cv2.imread(path)
-  img2 = transform(img,img.shape[0]/2.,img.shape[1]/2.,min(img.shape[0]//2, img.shape[1]//2),4,.4)
+  img2 = transform(img,img.shape[0]/2.,img.shape[1]/2.,min(img.shape[0]//2, img.shape[1]//2),4,.01)
   plt.figure(1)
   plt.imshow(img2)
   plt.show()
